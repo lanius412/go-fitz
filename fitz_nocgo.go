@@ -64,7 +64,7 @@ func New(filename string) (f *Document, err error) {
 
 // NewFromMemory returns new fitz document from byte slice.
 func NewFromMemory(b []byte) (f *Document, err error) {
-	if len(b) = 0 {
+	if len(b) == 0 {
 		return nil, ErrEmptyBytes
 	}
 	f = &Document{}
@@ -660,23 +660,6 @@ type bundle struct {
 
 func (b *bundle) call(rValue unsafe.Pointer, aValues ...unsafe.Pointer) {
 	ffi.Call(&b.cif, b.sym, rValue, aValues...)
-}
-
-func newBundle(name string, rType *ffi.Type, aTypes ...*ffi.Type) *bundle {
-	b := new(bundle)
-	var err error
-
-	if b.sym, err = purego.Dlsym(libmupdf, name); err != nil {
-		panic(err)
-	}
-
-	nArgs := uint32(len(aTypes))
-
-	if status := ffi.PrepCif(&b.cif, ffi.DefaultAbi, nArgs, rType, aTypes...); status != ffi.OK {
-		panic(status)
-	}
-
-	return b
 }
 
 var typeFzRect = ffi.Type{Type: ffi.Struct, Elements: &[]*ffi.Type{&ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat, &ffi.TypeFloat, nil}[0]}

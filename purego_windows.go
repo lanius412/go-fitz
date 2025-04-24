@@ -5,6 +5,9 @@ package fitz
 import (
 	"fmt"
 	"syscall"
+
+	"github.com/jupiterrider/ffi"
+	"golang.org/x/sys/windows"
 )
 
 const (
@@ -19,4 +22,25 @@ func loadLibrary() uintptr {
 	}
 
 	return uintptr(handle)
+}
+
+func newBundle(name string, rType *ffi.Type, aTypes ...*ffi.Type) *bundle {
+	b := new(bundle)
+	var err error
+
+	var h windows.Handle
+	if h, err = windows.GetStdHandle(uint32(libmupdf)); err != nil {
+		panic(err)
+	}
+	if b.sym, err = windows.GetProcAddress(h, name); err != nil {
+		panic(err)
+	}
+
+	nArgs := uint32(len(aTypes))
+
+	if status := ffi.PrepCif(&b.cif, ffi.DefaultAbi, nArgs, rType, aTypes...); status != ffi.OK {
+		panic(status)
+	}
+
+	return b
 }

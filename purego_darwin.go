@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/ebitengine/purego"
+	"github.com/jupiterrider/ffi"
 )
 
 const (
@@ -20,4 +21,21 @@ func loadLibrary() uintptr {
 	}
 
 	return uintptr(handle)
+}
+
+func newBundle(name string, rType *ffi.Type, aTypes ...*ffi.Type) *bundle {
+	b := new(bundle)
+	var err error
+
+	if b.sym, err = purego.Dlsym(libmupdf, name); err != nil {
+		panic(err)
+	}
+
+	nArgs := uint32(len(aTypes))
+
+	if status := ffi.PrepCif(&b.cif, ffi.DefaultAbi, nArgs, rType, aTypes...); status != ffi.OK {
+		panic(status)
+	}
+
+	return b
 }
